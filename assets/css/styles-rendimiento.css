@@ -1,0 +1,78 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.logo-navbar {
+  max-height: 32px;
+  width: auto;
+}
+
+.table-rendimiento-wrapper,
+.table-dia-wrapper {
+  width: 100%;
+  max-height: 60vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.badge-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.badge-meta-ok {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.badge-meta-warn {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-meta-danger {
+  background-color: #fdecea;
+  color: #b71c1c;
+}
+
+.progress {
+  height: 0.7rem;
+}
+
+.progress-sm {
+  height: 0.45rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.has-record span.flatpickr-day {
+  position: relative;
+}
+
+.flatpickr-day.has-record::after,
+.has-record::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background-color: #0d6efd;
+}
+
+@media (max-width: 767.98px) {
+  .table-rendimiento-wrapper,
+  .table-dia-wrapper {
+    max-height: none;
+  }
+
+  .navbar-brand span {
+    font-size: 0.95rem;
+  }
+}

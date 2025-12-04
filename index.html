@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TRRendimiento — Dependientxs</title>
+
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+  <!-- Estilos propios -->
+  <link href="assets/css/styles-rendimiento.css" rel="stylesheet">
+
+  <!-- Librerías JS externas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-light">
+
+  <!-- TOP NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <img src="assets/img/trlogo.png" alt="Logo TR" class="logo-navbar">
+        <span class="fw-semibold">TRRendimiento</span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <span class="text-white-50 small d-none d-md-inline">Rendimiento por dependientx</span>
+        <span class="badge bg-secondary" id="lastSaved">
+          <i class="fa-solid fa-clock-rotate-left me-1"></i>
+          Aún no guardado.
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container-fluid py-4">
+    <div class="row g-4">
+
+      <!-- PANEL IZQUIERDO: Configuración -->
+      <div class="col-xl-3 col-lg-4">
+
+        <!-- Card: Configuración general -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white border-0 pb-0">
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-sliders me-2 text-primary"></i>
+              Configuración
+            </h6>
+            <p class="text-muted small mb-0">Selecciona fecha y sucursal para los reportes.</p>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="fechaInput" class="form-label fw-semibold mb-1">Fecha corte (venta diaria)</label>
+              <input type="text" id="fechaInput" class="form-control form-control-sm" placeholder="Selecciona fecha">
+            </div>
+
+            <div class="mb-3">
+              <label for="sucursalTablasSelect" class="form-label fw-semibold mb-1">Sucursal (para tablas)</label>
+              <select id="sucursalTablasSelect" class="form-select form-select-sm">
+                <!-- Opciones llenadas por JS -->
+              </select>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <button id="btnHoy" class="btn btn-outline-primary btn-sm w-100">
+                <i class="fa-solid fa-calendar-day me-1"></i> Hoy
+              </button>
+              <button id="btnCorteMes" class="btn btn-outline-danger btn-sm w-100">
+                <i class="fa-solid fa-scissors me-1"></i> Corte fin de mes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Captura rápida -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white border-0 pb-0">
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+              Registrar venta diaria
+            </h6>
+            <p class="text-muted small mb-0">Registra el aporte de cada dependientx.</p>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <label for="sucursalInput" class="form-label fw-semibold mb-1">Sucursal</label>
+              <select id="sucursalInput" class="form-select form-select-sm"></select>
+            </div>
+            <div class="mb-2">
+              <label for="dependienteInput" class="form-label fw-semibold mb-1">Dependientx</label>
+              <select id="dependienteInput" class="form-select form-select-sm"></select>
+            </div>
+            <div class="mb-2">
+              <label for="montoInput" class="form-label fw-semibold mb-1">Monto generado</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$
+                </span>
+                <input type="number" min="0" step="0.01" id="montoInput" class="form-control" placeholder="0.00">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="notaInput" class="form-label fw-semibold mb-1">Nota (opcional)</label>
+              <textarea id="notaInput" class="form-control form-control-sm" rows="2" placeholder="Detalle breve"></textarea>
+            </div>
+            <button id="btnAgregar" class="btn btn-primary btn-sm w-100">
+              <i class="fa-solid fa-plus me-1"></i> Agregar registro
+            </button>
+          </div>
+        </div>
+
+        <!-- Card: Estado de cuenta -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-white border-0 pb-0">
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>
+              Estado de cuenta
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <label for="dependienteEstadoCuenta" class="form-label fw-semibold mb-1">Dependientx</label>
+              <select id="dependienteEstadoCuenta" class="form-select form-select-sm"></select>
+            </div>
+            <button id="btnEstadoCuenta" class="btn btn-outline-secondary btn-sm w-100">
+              <i class="fa-solid fa-download me-1"></i> Descargar PDF
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PANEL DERECHO: Resúmenes y tablas -->
+      <div class="col-xl-9 col-lg-8">
+
+        <!-- Card: Resumen sucursales -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white border-0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h6 class="card-title mb-1">
+                  <i class="fa-solid fa-store me-2 text-primary"></i>
+                  Avance de meta por sucursal (acumulado)
+                </h6>
+                <p class="text-muted small mb-0">
+                  Incluye todos los registros vigentes según la fecha seleccionada y el último corte.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body border-top">
+            <div id="resumenSucursalesContainer" class="vstack gap-3">
+              <!-- Se llena por JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Rendimiento por dependientx -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white border-0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h6 class="card-title mb-1">
+                  <i class="fa-solid fa-ranking-star me-2 text-primary"></i>
+                  Rendimiento por dependientx (acumulado)
+                </h6>
+                <p class="text-muted small mb-0">
+                  Ranking global y aporte por sucursal contra meta personal.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body border-top">
+            <div class="table-responsive table-rendimiento-wrapper">
+              <table class="table table-sm align-middle mb-0" id="tablaDependientesAcumulado">
+                <thead class="table-light">
+                  <tr>
+                    <th>Dependientx</th>
+                    <th style="width: 40%">Total global / Meta personal</th>
+                    <th>Detalle por sucursal</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyDependientesAcumulado"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Registros del día -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-white border-0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h6 class="card-title mb-1">
+                  <i class="fa-solid fa-calendar-day me-2 text-primary"></i>
+                  Registros del día seleccionado
+                </h6>
+                <p class="text-muted small mb-0">
+                  Ventas diarias por dependientx en la fecha indicada.
+                </p>
+              </div>
+              <div class="text-end small">
+                <div><strong>Venta diaria total:</strong> <span id="ventaDiariaTotal">$0.00</span></div>
+                <div><strong>Venta acumulada total:</strong> <span id="ventaAcumuladaTotal">$0.00</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body border-top">
+            <div class="table-responsive table-dia-wrapper">
+              <table class="table table-sm align-middle mb-0" id="tablaRegistrosDia">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 40px;">#</th>
+                    <th>Dependientx</th>
+                    <th>Sucursal</th>
+                    <th class="text-end">Monto</th>
+                    <th>Nota</th>
+                    <th class="text-center" style="width: 60px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyRegistrosDia"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /col derecha -->
+    </div><!-- /row -->
+  </main>
+
+  <!-- SweetAlert + JS de la app -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/rendimiento_dependientx.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
