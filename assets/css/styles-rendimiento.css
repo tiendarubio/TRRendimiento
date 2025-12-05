@@ -33,7 +33,7 @@ body {
   font-size: 0.75rem;
 }
 
-/* Contenedores de tabla para que no crezcan demasiado en alto */
+/* Tablas compactas */
 #tablaSucursales table,
 #tablaDependientes table,
 #tablaRegistrosDia table {
@@ -45,6 +45,57 @@ body {
   background-color: #e9ecef;
 }
 
+/* Leaderboard / ranking */
+.rank-col {
+  width: 48px;
+  text-align: center;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.rank-1 {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.rank-2 {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.rank-3 {
+  background: #e0f3ff;
+  color: #004085;
+}
+
+.rank-default {
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.leader-row {
+  border-left: 3px solid #0d6efd;
+}
+
+.leader-name {
+  font-weight: 600;
+}
+
+/* Fila de resumen en tablas */
+.table tfoot td {
+  border-top: 2px solid #dee2e6;
+}
+
+/* Responsive ajustes */
 @media (max-width: 767.98px) {
   .navbar-brand span {
     font-size: 0.95rem;

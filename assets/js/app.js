@@ -1,6 +1,5 @@
 // app.js — Helpers compartidos para TRRendimiento (Vercel)
 
-// BIN de JSONBin para rendimiento de dependientxs
 const RENDIMIENTO_BIN_ID = '691cce12d0ea881f40f0a29a';
 
 /**

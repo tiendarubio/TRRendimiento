@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tablaSucursalesWrap = $('tablaSucursales');
   const tablaDependientesWrap = $('tablaDependientes');
   const tablaRegistrosDiaWrap = $('tablaRegistrosDia');
+  const resumenTopDependienteEl = $('resumenTopDependiente');
 
   // Estado en memoria
   let CONFIG = {
@@ -259,57 +260,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     const registrosAcum = getRegistrosAcumuladoActual();
     const metaPersonal = parseMonto(CONFIG.metas.metaPersonalGlobal ?? 0);
 
+    const rowsStats = CONFIG.dependientes.map(dep => {
+      const registrosDep = registrosAcum.filter(r => r.dependiente === dep);
+      const totalDep = sumBy(registrosDep, r => r.monto);
+      const pct = metaPersonal > 0 ? (totalDep / metaPersonal) * 100 : 0;
+
+      const detalles = [];
+      for (const suc of CONFIG.sucursales) {
+        const totalDepSuc = sumBy(registrosDep.filter(r => r.sucursal === suc), r => r.monto);
+        if (totalDepSuc <= 0) continue;
+        const totalSuc = sumBy(registrosAcum.filter(r => r.sucursal === suc), r => r.monto);
+        const pctSuc = totalSuc > 0 ? (totalDepSuc / totalSuc) * 100 : 0;
+        detalles.push(`${suc}: ${formatCurrency(totalDepSuc)} (${pctSuc.toFixed(1)}% de la sucursal)`);
+      }
+
+      return { dep, totalDep, pct, metaPersonal, detalles };
+    });
+
+    rowsStats.sort((a, b) => b.totalDep - a.totalDep);
+
+    if (rowsStats.length && rowsStats[0].totalDep > 0) {
+      const top = rowsStats[0];
+      resumenTopDependienteEl.textContent =
+        `Top actual: ${top.dep} con ${formatCurrency(top.totalDep)} (${top.pct.toFixed(1)}% de su meta personal).`;
+    } else {
+      resumenTopDependienteEl.textContent = 'Aún no hay ventas registradas para mostrar ranking.';
+    }
+
     let html = '<table class="table table-sm align-middle mb-0">';
     html += '<thead class="table-light"><tr>';
+    html += '<th class="rank-col">#</th>';
     html += '<th>Dependientx</th>';
-    html += '<th class="text-end">Total global</th>';
-    html += '<th class="text-end">Meta personal (global)</th>';
-    html += '<th style="width:35%">Avance</th>';
+    html += '<th class="text-end">Total / Meta</th>';
+    html += '<th style="width:35%">Avance meta personal</th>';
     html += '<th class="text-xs text-muted">Detalle por sucursal</th>';
     html += '</tr></thead><tbody>';
 
-    if (!CONFIG.dependientes.length) {
+    if (!rowsStats.length) {
       html += '<tr><td colspan="5" class="text-center text-muted py-3">Sin dependientxs configurados.</td></tr>';
     } else {
-      for (const dep of CONFIG.dependientes) {
-        const registrosDep = registrosAcum.filter(r => r.dependiente === dep);
-        const totalDep = sumBy(registrosDep, r => r.monto);
-        const pct = metaPersonal > 0 ? (totalDep / metaPersonal) * 100 : 0;
+      rowsStats.forEach((row, idx) => {
+        const rank = idx + 1;
+        const isLeader = rank === 1;
+        const pctClampVal = clamp(row.pct, 0, 100);
 
-        // Detalle por sucursal (solo texto)
-        const detalles = [];
-        for (const suc of CONFIG.sucursales) {
-          const totalDepSuc = sumBy(registrosDep.filter(r => r.sucursal === suc), r => r.monto);
-          if (totalDepSuc <= 0) continue;
-          const totalSuc = sumBy(registrosAcum.filter(r => r.sucursal === suc), r => r.monto);
-          const pctSuc = totalSuc > 0 ? (totalDepSuc / totalSuc) * 100 : 0;
-          detalles.push(`${suc}: ${formatCurrency(totalDepSuc)} (${pctSuc.toFixed(1)}% de la sucursal)`);
+        let rankClass = 'rank-default';
+        let medalIcon = '';
+        if (rank === 1) {
+          rankClass = 'rank-1';
+          medalIcon = '<i class="fa-solid fa-medal text-warning me-1"></i>';
+        } else if (rank === 2) {
+          rankClass = 'rank-2';
+          medalIcon = '<i class="fa-solid fa-medal text-secondary me-1"></i>';
+        } else if (rank === 3) {
+          rankClass = 'rank-3';
+          medalIcon = '<i class="fa-solid fa-medal text-info me-1"></i>';
         }
 
-        html += '<tr>';
-        html += `<td>${dep}</td>`;
-        html += `<td class="text-end">${formatCurrency(totalDep)}</td>`;
-        html += `<td class="text-end">${formatCurrency(metaPersonal)}</td>`;
+        html += `<tr class="${isLeader ? 'leader-row' : ''}">`;
+        html += `<td class="rank-col">
+          <div class="rank-badge ${rankClass}">${rank}</div>
+        </td>`;
+        html += `<td class="leader-name">${medalIcon}${row.dep}</td>`;
+        html += `<td class="text-end">${formatCurrency(row.totalDep)} / ${formatCurrency(row.metaPersonal)}</td>`;
         html += '<td>';
-        html += `<div class="progress" role="progressbar" aria-valuenow="${clamp(pct,0,100).toFixed(1)}" aria-valuemin="0" aria-valuemax="100">`;
-        html += `<div class="progress-bar bg-info" style="width:${clamp(pct,0,100).toFixed(1)}%"></div>`;
+        html += `<div class="progress" role="progressbar" aria-valuenow="${pctClampVal.toFixed(1)}" aria-valuemin="0" aria-valuemax="100">`;
+        html += `<div class="progress-bar ${isLeader ? 'bg-success' : 'bg-info'}" style="width:${pctClampVal.toFixed(1)}%"></div>`;
         html += '</div>';
         html += `<div class="d-flex justify-content-between text-muted progress-label mt-1">`;
-        html += `<span>${pct.toFixed(1)}% de la meta</span>`;
-        html += `<span>${formatCurrency(totalDep)} / ${formatCurrency(metaPersonal)}</span>`;
+        html += `<span>${row.pct.toFixed(1)}% de la meta</span>`;
+        html += `<span>${formatCurrency(row.totalDep)}</span>`;
         html += '</div>';
         html += '</td>';
 
         html += '<td class="text-xs text-muted">';
-        if (detalles.length) {
-          html += detalles.map(d => `<div>${d}</div>`).join('');
+        if (row.detalles.length) {
+          html += row.detalles.map(d => `<div>${d}</div>`).join('');
         } else {
           html += '<span class="text-muted">Sin aporte por sucursal aún.</span>';
         }
         html += '</td>';
 
         html += '</tr>';
-      }
+      });
     }
 
     html += '</tbody></table>';
@@ -350,7 +383,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     html += '</tbody></table>';
     tablaRegistrosDiaWrap.innerHTML = html;
 
-    // Listeners para eliminar
     tablaRegistrosDiaWrap.querySelectorAll('.btn-eliminar-registro').forEach(btn => {
       btn.addEventListener('click', async (ev) => {
         const id = ev.currentTarget.getAttribute('data-id');
@@ -475,7 +507,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!Array.isArray(metaGlobal.cortes)) metaGlobal.cortes = [];
     metaGlobal.cortes.push(corte);
-    metaGlobal.ultimaFechaCorte = hasta; // se considera corte hasta la última fecha con datos
+    metaGlobal.ultimaFechaCorte = hasta;
 
     try {
       await guardarEstado();
@@ -507,7 +539,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Encabezado tipo banco
     doc.setFontSize(14);
     doc.text('Estado de cuenta — Rendimiento dependientx', 10, 12);
     doc.setFontSize(10);
@@ -518,7 +549,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     doc.text(`Total acumulado: ${formatCurrency(totalDep)}`, 10, 40);
     doc.text(`Porcentaje de cumplimiento: ${pct.toFixed(1)}%`, 10, 46);
 
-    // Tabla de movimientos
     const body = registrosDep.map((r, idx) => [
       idx + 1,
       r.fecha,
@@ -566,7 +596,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- Init ----------
 
-  // Fecha por defecto: hoy
   fechaFiltro.value = hoyISO();
 
   await initConfig();

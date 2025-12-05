@@ -21,17 +21,12 @@ export default async function handler(req, res) {
     const data = await resp.json();
     const values = Array.isArray(data.values) ? data.values : [];
 
-    // Estructura esperada (flexible):
-    // Col A (desde fila 2): lista de dependientxs
-    // Col B (desde fila 2): lista de sucursales
-    // Col C: meta sucursal en la misma fila de la sucursal
-    // Col D: meta personal (usar el primer valor numérico encontrado)
     const dependientesSet = new Set();
     const sucursalesSet = new Set();
     const metasSucursal = {};
     let metaPersonalGlobal = 0;
 
-    for (let i = 1; i < values.length; i++) { // saltar fila encabezado
+    for (let i = 1; i < values.length; i++) {
       const row = values[i] || [];
       const dep = (row[0] || '').trim();
       const suc = (row[1] || '').trim();
