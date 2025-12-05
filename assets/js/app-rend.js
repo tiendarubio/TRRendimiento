@@ -1,6 +1,6 @@
 
 /**
- * app-rend.js — Config & helpers para TRRendimiento (versión Vercel, sin llaves en el cliente)
+ * app-rend.js — Config & helpers para TRRendimiento (Vercel)
  */
 
 const RENDIMIENTO_BIN_ID = '691cce12d0ea881f40f0a29a';
@@ -16,14 +16,6 @@ async function loadRendimientoConfig() {
     throw new Error('No se pudo cargar la configuración de rendimiento.');
   }
   const data = await resp.json();
-  /**
-   * data = {
-   *   dependientxs: ['Ana', 'Luis', ...],
-   *   sucursales:   ['Avenida Morazán', 'Sexta Calle', 'Centro Comercial'],
-   *   metasSucursal: { 'Avenida Morazán': 1000, ... },
-   *   metaPersonalGlobal: 500
-   * }
-   */
   return data;
 }
 

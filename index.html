@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TRRendimiento — Dependientxs</title>
+  <title>TRRendimiento — Rendimiento por dependientx</title>
 
   <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,10 +12,6 @@
 
   <!-- Estilos propios -->
   <link href="assets/css/styles-rendimiento.css" rel="stylesheet">
-
-  <!-- Librerías JS externas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="bg-light">
 
@@ -41,46 +37,33 @@
   <main class="container-fluid py-4">
     <div class="row g-4">
 
-      <!-- PANEL IZQUIERDO: filtros + acciones -->
+      <!-- PANEL IZQUIERDO -->
       <div class="col-xl-3 col-lg-4">
-        <!-- Card: Filtros principales -->
+
+        <!-- Card: Configuración -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white border-0 pb-0">
             <h6 class="card-title mb-1">
               <i class="fa-solid fa-sliders me-2 text-primary"></i>
-              Filtros
+              Configuración
             </h6>
-            <p class="text-muted small mb-0">Control de fecha, sucursal y dependientx.</p>
+            <p class="text-muted small mb-0">Filtros básicos para las tablas y reportes.</p>
           </div>
           <div class="card-body">
-            <!-- Fecha venta diaria -->
             <div class="mb-3">
-              <label for="fechaSeleccionada" class="form-label fw-semibold mb-1">
-                Fecha (venta diaria)
-              </label>
+              <label for="fechaSeleccionada" class="form-label fw-semibold mb-1">Fecha corte (venta diaria)</label>
               <input type="date" id="fechaSeleccionada" class="form-control form-control-sm">
-              <div class="form-text small">
-                Selecciona el día para ver la venta diaria.
-              </div>
             </div>
 
-            <!-- Selector de sucursal para tablas -->
             <div class="mb-3">
-              <label for="sucursalFiltro" class="form-label fw-semibold mb-1">
-                Sucursal (para tablas)
-              </label>
+              <label for="sucursalFiltro" class="form-label fw-semibold mb-1">Sucursal (para tablas)</label>
               <select id="sucursalFiltro" class="form-select form-select-sm">
-                <!-- Se llena dinámicamente -->
               </select>
             </div>
 
-            <!-- Selector de dependientx (para estado de cuenta) -->
-            <div class="mb-3">
-              <label for="dependientxFiltro" class="form-label fw-semibold mb-1">
-                Dependientx (estado de cuenta)
-              </label>
+            <div class="mb-2">
+              <label for="dependientxFiltro" class="form-label fw-semibold mb-1">Dependientx (estado de cuenta)</label>
               <select id="dependientxFiltro" class="form-select form-select-sm">
-                <!-- Se llena dinámicamente -->
               </select>
             </div>
           </div>
@@ -94,21 +77,19 @@
               Acciones
             </h6>
           </div>
-          <div class="card-body">
-            <div class="d-grid gap-2">
-              <button id="btnRegistrar" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-plus me-1"></i> Registrar venta
-              </button>
-              <button id="btnCorteMes" class="btn btn-outline-warning btn-sm">
-                <i class="fa-solid fa-scissors me-1"></i> Corte de mes
-              </button>
-              <button id="btnEstadoCuenta" class="btn btn-outline-success btn-sm">
-                <i class="fa-solid fa-file-lines me-1"></i> Estado de cuenta (PDF)
-              </button>
-              <button id="btnRefrescar" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-rotate me-1"></i> Refrescar datos
-              </button>
-            </div>
+          <div class="card-body d-grid gap-2">
+            <button id="btnRegistrar" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-plus me-1"></i> Registrar venta
+            </button>
+            <button id="btnCorteMes" class="btn btn-outline-warning btn-sm">
+              <i class="fa-solid fa-scissors me-1"></i> Corte de mes
+            </button>
+            <button id="btnEstadoCuenta" class="btn btn-outline-info btn-sm">
+              <i class="fa-solid fa-file-lines me-1"></i> Estado de cuenta (PDF)
+            </button>
+            <button id="btnRefrescar" class="btn btn-outline-secondary btn-sm">
+              <i class="fa-solid fa-rotate me-1"></i> Refrescar datos
+            </button>
           </div>
         </div>
 
@@ -116,74 +97,60 @@
         <div class="card shadow-sm">
           <div class="card-header bg-white border-0 pb-0">
             <h6 class="card-title mb-1">
-              <i class="fa-solid fa-chart-pie me-2 text-primary"></i>
+              <i class="fa-solid fa-chart-line me-2 text-primary"></i>
               Totales globales
             </h6>
           </div>
           <div class="card-body">
-            <div class="small text-muted mb-1">Montos en todo el ciclo activo.</div>
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="small fw-semibold">Venta diaria (seleccionada)</span>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small">Venta diaria (global)</span>
               <span class="badge bg-primary-soft text-primary fw-semibold" id="lblTotalDiarioGlobal">$0.00</span>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <span class="small fw-semibold">Venta acumulada (ciclo)</span>
+              <span class="text-muted small">Venta acumulada (ciclo actual)</span>
               <span class="badge bg-success-soft text-success fw-semibold" id="lblTotalAcumuladoGlobal">$0.00</span>
             </div>
           </div>
         </div>
+
       </div>
 
-      <!-- PANEL DERECHO: registro + dashboard -->
+      <!-- PANEL DERECHO -->
       <div class="col-xl-9 col-lg-8">
 
-        <!-- Card: Registro de venta -->
+        <!-- Card: Registro de venta diaria -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white border-0">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-cash-register me-2 text-primary"></i>
-                  Registro de venta diaria
-                </h6>
-                <p class="text-muted small mb-0">
-                  Ingresa el aporte de cada dependientx por sucursal para la fecha seleccionada.
-                </p>
-              </div>
-            </div>
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-cash-register me-2 text-primary"></i>
+              Registro de venta diaria
+            </h6>
+            <p class="text-muted small mb-0">Asigna el monto vendido por dependientx y sucursal.</p>
           </div>
           <div class="card-body border-top">
-            <div class="row g-2 align-items-end">
+            <div class="row g-3 align-items-end">
               <div class="col-md-4">
                 <label for="dependientxInput" class="form-label fw-semibold mb-1">Dependientx</label>
-                <select id="dependientxInput" class="form-select form-select-sm">
-                  <!-- dinámico -->
-                </select>
+                <select id="dependientxInput" class="form-select form-select-sm"></select>
               </div>
               <div class="col-md-4">
                 <label for="sucursalInput" class="form-label fw-semibold mb-1">Sucursal</label>
-                <select id="sucursalInput" class="form-select form-select-sm">
-                  <!-- dinámico -->
-                </select>
+                <select id="sucursalInput" class="form-select form-select-sm"></select>
               </div>
               <div class="col-md-3">
-                <label for="montoInput" class="form-label fw-semibold mb-1">Monto generado</label>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text bg-white">$
-                  </span>
-                  <input type="number" step="0.01" min="0" id="montoInput" class="form-control" placeholder="0.00">
-                </div>
+                <label for="montoInput" class="form-label fw-semibold mb-1">Monto (USD)</label>
+                <input type="number" step="0.01" min="0" id="montoInput" class="form-control form-control-sm" placeholder="0.00">
               </div>
               <div class="col-md-1 d-grid">
-                <button id="btnAgregarRegistro" class="btn btn-primary btn-sm mt-3 mt-md-0">
-                  <i class="fa-solid fa-plus"></i>
+                <button id="btnAgregarRegistro" class="btn btn-success btn-sm mt-1">
+                  <i class="fa-solid fa-check"></i>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Card: Calendario inline -->
+        <!-- Card: Calendario de registros -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white border-0">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -192,76 +159,65 @@
                   <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
                   Calendario de registros
                 </h6>
-                <p class="text-muted small mb-0">
-                  Los días con registros aparecen resaltados. Haz clic para cambiar la fecha.
-                </p>
+                <p class="text-muted small mb-0">Días con ventas registradas en el periodo.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <label for="mesCalendario" class="small text-muted mb-0">Mes</label>
+                <input type="month" id="mesCalendario" class="form-control form-control-sm" style="max-width: 150px;">
               </div>
             </div>
           </div>
           <div class="card-body border-top">
-            <div class="row g-2 align-items-center mb-2">
-              <div class="col-auto">
-                <label for="mesCalendario" class="form-label fw-semibold mb-1 small mb-0">Mes</label>
-                <input type="month" id="mesCalendario" class="form-control form-control-sm">
-              </div>
+            <div class="d-flex align-items-center gap-3 mb-2 small text-muted">
+              <span>
+                <span class="calendar-legend bg-primary" style="opacity:.15; border:1px solid rgba(13,110,253,.4);"></span>
+                <span class="ms-1">Día con registros</span>
+              </span>
+              <span>
+                <span class="calendar-legend bg-primary"></span>
+                <span class="ms-1">Día seleccionado</span>
+              </span>
             </div>
-            <div id="calendarioDias" class="calendar-grid small">
-              <!-- Se genera dinámicamente -->
-            </div>
-            <div class="mt-2 small text-muted">
-              <span class="badge bg-primary me-1 calendar-legend"></span> Día con registros
-            </div>
+            <div id="calendarioDias" class="calendar-grid"></div>
           </div>
         </div>
 
-        <!-- Card: Resumen por sucursal (acumulado) -->
+        <!-- Card: Avance de meta por sucursal -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white border-0">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-store me-2 text-primary"></i>
-                  Avance de meta por sucursal (acumulado)
-                </h6>
-                <p class="text-muted small mb-0">
-                  Acumulado del ciclo actual, independiente de la fecha seleccionada.
-                </p>
-              </div>
-            </div>
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-store me-2 text-primary"></i>
+              Avance de meta por sucursal (acumulado)
+            </h6>
+            <p class="text-muted small mb-0">Acumulado del ciclo actual vs meta de cada sucursal.</p>
           </div>
           <div class="card-body border-top">
-            <div id="contenedorSucursales" class="vstack gap-3">
-              <!-- Cards de sucursal -->
-            </div>
+            <div id="contenedorSucursales" class="d-grid gap-3"></div>
           </div>
         </div>
 
-        <!-- Card: Ranking de dependientxs -->
+        <!-- Card: Ranking por dependientx -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white border-0">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-ranking-star me-2 text-primary"></i>
-                  Rendimiento por dependientx (acumulado)
-                </h6>
-                <p class="text-muted small mb-0">
-                  Ranking según avance de meta personal global.
-                </p>
-              </div>
-            </div>
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-ranking-star me-2 text-primary"></i>
+              Rendimiento por dependientx (acumulado)
+            </h6>
+            <p class="text-muted small mb-0">
+              Ranking global por meta personal; el detalle por sucursal se muestra en texto.
+            </p>
           </div>
           <div class="card-body border-top">
             <div class="table-responsive table-sm-wrapper">
               <table class="table table-sm align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center" style="width:48px;">#</th>
-                    <th>Dependientx</th>
-                    <th class="text-end text-nowrap">Total global</th>
-                    <th class="text-end text-nowrap">Meta personal</th>
-                    <th class="text-nowrap">Avance meta personal</th>
-                    <th class="text-nowrap">Detalle por sucursal</th>
+                    <th class="text-center small" style="width:40px;">#</th>
+                    <th class="small">Dependientx</th>
+                    <th class="text-end small">Total global</th>
+                    <th class="text-end small">Meta personal (global)</th>
+                    <th class="small" style="width:180px;">Avance meta</th>
+                    <th class="small">Detalle por sucursal</th>
                   </tr>
                 </thead>
                 <tbody id="tablaRankingBody"></tbody>
@@ -270,30 +226,24 @@
           </div>
         </div>
 
-        <!-- Card: Venta diaria (detalle) -->
+        <!-- Card: Venta diaria detalle -->
         <div class="card shadow-sm">
           <div class="card-header bg-white border-0">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-list-ul me-2 text-primary"></i>
-                  Venta diaria — Detalle por registro
-                </h6>
-                <p class="text-muted small mb-0">
-                  Registros correspondientes únicamente a la fecha seleccionada.
-                </p>
-              </div>
-            </div>
+            <h6 class="card-title mb-1">
+              <i class="fa-solid fa-list-check me-2 text-primary"></i>
+              Venta diaria — Detalle
+            </h6>
+            <p class="text-muted small mb-0">Registros de la fecha seleccionada.</p>
           </div>
           <div class="card-body border-top">
             <div class="table-responsive table-sm-wrapper">
               <table class="table table-sm align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center" style="width:48px;">#</th>
-                    <th>Dependientx</th>
-                    <th>Sucursal</th>
-                    <th class="text-end text-nowrap">Monto</th>
+                    <th class="text-center small" style="width:40px;">#</th>
+                    <th class="small">Dependientx</th>
+                    <th class="small">Sucursal</th>
+                    <th class="text-end small">Monto</th>
                   </tr>
                 </thead>
                 <tbody id="tablaDiariaBody"></tbody>
@@ -306,12 +256,12 @@
     </div><!-- /row -->
   </main>
 
-  <!-- SweetAlert + JS de la app -->
+  <!-- Librerías JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="assets/js/app-rend.js"></script>
   <script src="assets/js/rendimiento_dependientx.js"></script>
-
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

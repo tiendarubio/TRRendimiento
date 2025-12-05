@@ -493,7 +493,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderTablaDiaria() {
     fechaSeleccionada = toISODateOnly(fechaSeleccionadaInput.value || fechaSeleccionada);
-    const regsDia = getRegistrosFecha(fechaSeleccionada);
+    let regsDia = getRegistrosFecha(fechaSeleccionada);
+
+    const sucFiltro = sucursalFiltro.value;
+    if (sucFiltro) {
+      regsDia = regsDia.filter(r => r.sucursal === sucFiltro);
+    }
 
     tablaDiariaBody.innerHTML = '';
 
