@@ -1,4 +1,3 @@
-
 export default async function handler(req, res) {
   try {
     const apiKey = process.env.JSONBIN_API_KEY;
