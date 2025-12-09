@@ -1,34 +1,47 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
     res.status(405).json({ error: 'Método no permitido' });
     return;
   }
 
-  const { binId, payload } = req.body || {};
-  if (!binId || !payload) {
-    res.status(400).json({ error: 'binId y payload son requeridos' });
-    return;
-  }
-
   try {
-    const url = `https://api.jsonbin.io/v3/b/${encodeURIComponent(binId)}`;
+    const apiKey = process.env.JSONBIN_API_KEY;
+    if (!apiKey) {
+      res.status(500).json({ error: 'Falta JSONBIN_API_KEY en variables de entorno' });
+      return;
+    }
+
+    const { binId, payload } = req.body || {};
+    if (!binId) {
+      res.status(400).json({ error: 'binId es requerido' });
+      return;
+    }
+
+    const url = `https://api.jsonbin.io/v3/b/${binId}`;
+
     const resp = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': process.env.JSONBIN_MASTER_KEY
+        'X-Access-Key': apiKey
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload ?? {})
     });
 
+    const data = await resp.json().catch(() => null);
+
     if (!resp.ok) {
-      throw new Error('Error JSONBin: ' + resp.status);
+      res.status(resp.status).json({
+        error: 'Error al guardar en JSONBin',
+        details: data || null
+      });
+      return;
     }
 
-    const data = await resp.json();
-    res.status(200).json({ ok: true, data });
+    res.status(200).json(data);
   } catch (err) {
-    console.error('Error en /api/jsonbin-save:', err);
-    res.status(500).json({ error: 'Error interno al guardar en JSONBin' });
+    console.error('jsonbin-save error', err);
+    res.status(500).json({ error: 'Error interno en jsonbin-save', details: String(err) });
   }
 }
