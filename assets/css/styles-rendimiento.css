@@ -1,4 +1,3 @@
-
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -22,7 +21,7 @@ body {
   font-size: 0.85rem;
 }
 
-/* Badges de días con registro */
+/* Badges de días con registro (ya no se usan como botones, pero se dejan por si acaso)
 .badge-dia-registro {
   cursor: pointer;
   border-radius: 999px;
@@ -31,6 +30,7 @@ body {
 .badge-dia-registro.active {
   background-color: #0d6efd !important;
 }
+*/
 
 /* Scoreboard superior */
 .score-card {
@@ -207,4 +207,38 @@ body {
   .navbar-brand span {
     font-size: 0.95rem;
   }
+}
+
+/* Botón extra-pequeño para el corte mensual */
+.btn-xs {
+  --bs-btn-padding-y: .15rem;
+  --bs-btn-padding-x: .4rem;
+  --bs-btn-font-size: .7rem;
+  --bs-btn-border-radius: 999px;
+  line-height: 1;
+}
+
+/* Contenedor compacto (si se usa) para días con registros */
+.dias-registros-mini {
+  min-height: 1.5rem;
+  max-height: 80px;
+  overflow-y: auto;
+  padding: 0.15rem 0;
+}
+
+/* Flatpickr: marcar días con registros con un punto azul */
+.flatpickr-day.has-record {
+  position: relative;
+}
+
+.flatpickr-day.has-record::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0d6efd;
 }

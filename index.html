@@ -9,6 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
+  <!-- Flatpickr (calendario para fecha) -->
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
   <!-- Estilos propios -->
   <link href="assets/css/styles-rendimiento.css" rel="stylesheet">
 
@@ -41,62 +44,41 @@
   <main class="container-xxl py-4">
     <div class="row g-4">
 
-      <!-- PANEL IZQUIERDO: Captura y filtros -->
+      <!-- PANEL IZQUIERDO: Trabajo diario (filtros + captura) -->
       <div class="col-xl-3 col-lg-4">
-        <!-- Card: Configuración / Filtros -->
         <div class="card shadow-sm mb-4 h-100">
           <div class="card-header bg-white border-0 pb-0">
             <h6 class="card-title mb-1 d-flex align-items-center gap-2">
-              <i class="fa-solid fa-sliders text-primary"></i>
-              <span>Filtros y corte</span>
+              <i class="fa-solid fa-bolt text-primary"></i>
+              <span>Trabajo diario</span>
             </h6>
-            <p class="text-muted small mb-0">Control diario y corte mensual.</p>
+            <p class="text-muted small mb-0">
+              Selecciona fecha y sucursal y registra las ventas del día.
+            </p>
           </div>
-          <div class="card-body">
-            <div class="row g-3 mb-2 align-items-end filtro-fecha-sucursal">
-              <div class="col-12">
-                <label for="fechaFiltro" class="form-label fw-semibold mb-1">
-                  Fecha corte (venta diaria)
-                </label>
-                <input type="date" id="fechaFiltro" class="form-control form-control-sm">
-              </div>
-              <div class="col-12">
-                <label for="sucursalFiltro" class="form-label fw-semibold mb-1">
-                  Sucursal (para tablas)
-                </label>
-                <select id="sucursalFiltro" class="form-select form-select-sm">
-                  <option value="">Todas las sucursales</option>
-                </select>
+          <div class="card-body pb-3">
+            <!-- Fecha (flatpickr) -->
+            <div class="mb-2">
+              <label for="fechaFiltro" class="form-label fw-semibold mb-1">
+                Fecha
+              </label>
+              <input type="text" id="fechaFiltro" class="form-control form-control-sm" placeholder="Selecciona una fecha">
+              <div id="diasConRegistros" class="form-text text-muted text-xs mt-1">
+                Los días con un punto azul en el calendario tienen ventas registradas.
               </div>
             </div>
 
-            <div class="mb-3 border rounded-3 p-2 bg-light-subtle small">
-              <div class="d-flex align-items-center justify-content-between mb-1">
-                <span class="fw-semibold text-muted">Días con registros</span>
-                <span class="text-muted text-xs">Click para cargar</span>
-              </div>
-              <div id="diasConRegistros" class="d-flex flex-wrap gap-1"></div>
+            <!-- Sucursal filtro para tablas -->
+            <div class="mb-3">
+              <label for="sucursalFiltro" class="form-label fw-semibold mb-1">
+                Sucursal (tablas)
+              </label>
+              <select id="sucursalFiltro" class="form-select form-select-sm">
+                <option value="">Todas</option>
+              </select>
             </div>
 
-            <div class="d-grid gap-2 mt-2">
-              <button id="btnCorteMensual" class="btn btn-outline-danger btn-sm">
-                <i class="fa-solid fa-scissors me-1"></i>
-                Corte mensual
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card: Captura de ventas -->
-        <div class="card shadow-sm mt-4">
-          <div class="card-header bg-white border-0 pb-0">
-            <h6 class="card-title mb-1 d-flex align-items-center gap-2">
-              <i class="fa-solid fa-cash-register text-primary"></i>
-              <span>Captura de venta diaria</span>
-            </h6>
-            <p class="text-muted small mb-0">Registra cuánto vendió cada dependientx.</p>
-          </div>
-          <div class="card-body">
+            <!-- Captura de ventas -->
             <div class="mb-2">
               <label for="dependienteInput" class="form-label fw-semibold mb-1">
                 Dependientx
@@ -130,21 +112,30 @@
               </button>
             </div>
 
-            <hr class="my-3">
+            <hr class="my-2">
 
-            <div class="mb-2">
-              <label for="dependienteEstadoCuenta" class="form-label fw-semibold mb-1">
-                Estado de cuenta por dependientx
-              </label>
-              <select id="dependienteEstadoCuenta" class="form-select form-select-sm">
-                <option value="">Selecciona…</option>
-              </select>
-            </div>
-            <div class="d-grid gap-2">
-              <button id="btnEstadoCuentaPDF" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-file-pdf me-1"></i>
-                Descargar estado de cuenta
-              </button>
+            <!-- Corte mensual + estado de cuenta -->
+            <div class="mt-2 pt-1 d-flex flex-column gap-2">
+              <div class="d-flex align-items-center justify-content-between">
+                <span class="fw-semibold text-muted text-xs">Corte mensual</span>
+                <button id="btnCorteMensual" class="btn btn-outline-danger btn-xs">
+                  <i class="fa-solid fa-scissors"></i>
+                </button>
+              </div>
+
+              <div>
+                <label for="dependienteEstadoCuenta" class="form-label fw-semibold mb-1 small">
+                  Estado de cuenta por dependientx
+                </label>
+                <div class="d-flex gap-2">
+                  <select id="dependienteEstadoCuenta" class="form-select form-select-sm">
+                    <option value="">Selecciona…</option>
+                  </select>
+                  <button id="btnEstadoCuentaPDF" class="btn btn-outline-secondary btn-sm flex-shrink-0">
+                    <i class="fa-solid fa-file-pdf"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -279,7 +270,8 @@
     </div>
   </main>
 
-  <!-- SweetAlert + JS de la app -->
+  <!-- SweetAlert + Flatpickr + JS de la app -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/rendimiento_dependientx.js"></script>

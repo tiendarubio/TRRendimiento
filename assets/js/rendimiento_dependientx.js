@@ -1,51 +1,51 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const $ = (id) => document.getElementById(id);
 
-  const lastUpdatedBadge = $('lastUpdated');
+  const lastUpdatedBadge = document.getElementById('lastUpdated');
 
-  const fechaFiltro = $('fechaFiltro');
-  const sucursalFiltro = $('sucursalFiltro');
-  const diasConRegistrosWrap = $('diasConRegistros');
+  const fechaFiltro = document.getElementById('fechaFiltro');
+  const sucursalFiltro = document.getElementById('sucursalFiltro');
+  const diasConRegistrosWrap = document.getElementById('diasConRegistros');
 
-  const dependienteInput = $('dependienteInput');
-  const sucursalInput = $('sucursalInput');
-  const montoInput = $('montoInput');
-  const btnAgregarRegistro = $('btnAgregarRegistro');
+  const dependienteInput = document.getElementById('dependienteInput');
+  const sucursalInput = document.getElementById('sucursalInput');
+  const montoInput = document.getElementById('montoInput');
+  const btnAgregarRegistro = document.getElementById('btnAgregarRegistro');
 
-  const dependienteEstadoCuenta = $('dependienteEstadoCuenta');
-  const btnEstadoCuentaPDF = $('btnEstadoCuentaPDF');
+  const dependienteEstadoCuenta = document.getElementById('dependienteEstadoCuenta');
+  const btnEstadoCuentaPDF = document.getElementById('btnEstadoCuentaPDF');
 
-  const btnCorteMensual = $('btnCorteMensual');
+  const btnCorteMensual = document.getElementById('btnCorteMensual');
 
-  const ventaDiariaSucursalEl = $('ventaDiariaSucursal');
-  const ventaTotalSucursalEl = $('ventaTotalSucursal');
-  const ventaDiariaGlobalEl = $('ventaDiariaGlobal');
-  const ventaTotalGlobalEl = $('ventaTotalGlobal');
+  const ventaDiariaSucursalEl = document.getElementById('ventaDiariaSucursal');
+  const ventaTotalSucursalEl = document.getElementById('ventaTotalSucursal');
+  const ventaDiariaGlobalEl = document.getElementById('ventaDiariaGlobal');
+  const ventaTotalGlobalEl = document.getElementById('ventaTotalGlobal');
 
-  const tablaSucursalesWrap = $('tablaSucursales');
-  const tablaDependientesWrap = $('tablaDependientes');
-  const tablaRegistrosDiaWrap = $('tablaRegistrosDia');
-  const resumenTopDependienteEl = $('resumenTopDependiente');
-  const top3Panel = $('top3Panel');
+  const tablaSucursalesWrap = document.getElementById('tablaSucursales');
+  const tablaDependientesWrap = document.getElementById('tablaDependientes');
+  const tablaRegistrosDiaWrap = document.getElementById('tablaRegistrosDia');
+  const resumenTopDependienteEl = document.getElementById('resumenTopDependiente');
+  const top3Panel = document.getElementById('top3Panel');
 
-  // Estado en memoria
   let CONFIG = {
     dependientes: [],
     sucursales: [],
     metas: {
-      sucursal: {},            // { sucursal: meta }
-      metaPersonalGlobal: 0    // número
+      sucursal: {},
+      metaPersonalGlobal: 0
     }
   };
 
-  let registros = [];          // [{id, fecha, dependiente, sucursal, monto}]
+  let registros = [];
   let metaGlobal = {
     updatedAt: null,
-    ultimaFechaCorte: null,    // 'YYYY-MM-DD' o null
-    cortes: []                 // array de cortes mensuales
+    ultimaFechaCorte: null,
+    cortes: []
   };
 
-  // ---------- Utilidades ----------
+  let fpInstance = null;
+  let diasConRegistroSet = new Set();
 
   function hoyISO() {
     const d = new Date();
@@ -78,13 +78,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     return registros.filter(r => r.fecha === fecha);
   }
 
-  function getDiasConRegistros() {
-    const set = new Set(registros.map(r => r.fecha));
-    return Array.from(set).sort();
-  }
-
   function sumBy(arr, selector) {
     return arr.reduce((acc, item) => acc + (selector(item) || 0), 0);
+  }
+
+  // ---------- Flatpickr ----------
+
+  function initDatePicker() {
+    if (typeof flatpickr === 'undefined' || !fechaFiltro) return;
+
+    fpInstance = flatpickr(fechaFiltro, {
+      dateFormat: 'Y-m-d',
+      defaultDate: fechaFiltro.value || hoyISO(),
+      onChange: (selectedDates, dateStr) => {
+        fechaFiltro.value = dateStr;
+        renderAll();
+      },
+      onDayCreate: (dObj, dStr, fp, dayElem) => {
+        try {
+          const dateObj = dayElem.dateObj;
+          if (!dateObj) return;
+          const y = dateObj.getFullYear();
+          const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const d = String(dateObj.getDate()).padStart(2, '0');
+          const iso = `${y}-${m}-${d}`;
+          if (diasConRegistroSet.has(iso)) {
+            dayElem.classList.add('has-record');
+          }
+        } catch (e) {
+          // noop
+        }
+      }
+    });
+  }
+
+  function renderDiasConRegistros() {
+    diasConRegistroSet = new Set(registros.map(r => r.fecha));
+
+    if (diasConRegistrosWrap) {
+      if (!diasConRegistroSet.size) {
+        diasConRegistrosWrap.textContent = 'Aún no hay ventas registradas.';
+      } else {
+        diasConRegistrosWrap.textContent = 'Los días con un punto azul en el calendario tienen ventas registradas.';
+      }
+    }
+
+    if (fpInstance && typeof fpInstance.redraw === 'function') {
+      fpInstance.redraw();
+    }
   }
 
   // ---------- Carga inicial ----------
@@ -100,7 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       Swal.fire('Error', 'No se pudo cargar la configuración desde Google Sheets.', 'error');
     }
 
-    // Poblar selects
     const depOptions = ['<option value="">Selecciona…</option>']
       .concat(CONFIG.dependientes.map(d => `<option value="${d}">${d}</option>`));
     dependienteInput.innerHTML = depOptions.join('');
@@ -110,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       .concat(CONFIG.sucursales.map(s => `<option value="${s}">${s}</option>`));
     sucursalInput.innerHTML = sucOptions.join('');
 
-    const sucFiltroOptions = ['<option value="">Todas las sucursales</option>']
+    const sucFiltroOptions = ['<option value="">Todas</option>']
       .concat(CONFIG.sucursales.map(s => `<option value="${s}">${s}</option>`));
     sucursalFiltro.innerHTML = sucFiltroOptions.join('');
   }
@@ -163,21 +203,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ---------- Render ----------
-
-  function renderDiasConRegistros() {
-    const dias = getDiasConRegistros();
-    const selected = fechaFiltro.value;
-    if (!dias.length) {
-      diasConRegistrosWrap.innerHTML = '<span class="text-muted text-xs">Sin registros aún.</span>';
-      return;
-    }
-    diasConRegistrosWrap.innerHTML = dias.map(d => {
-      const dd = d.slice(8, 10);
-      const mm = d.slice(5, 7);
-      const cls = d === selected ? 'badge bg-primary badge-dia-registro active' : 'badge bg-secondary badge-dia-registro';
-      return `<span class="${cls}" data-fecha="${d}">${dd}/${mm}</span>`;
-    }).join(' ');
-  }
 
   function renderResumenes() {
     const fecha = fechaFiltro.value;
@@ -320,7 +345,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       resumenTopDependienteEl.textContent = 'Aún no hay ventas registradas para mostrar ranking.';
     }
 
-    // Panel compacto Top3 en el scoreboard
     renderTop3Panel(rowsStats);
 
     let html = '<table class="table table-sm align-middle mb-0">';
@@ -422,15 +446,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     tablaRegistrosDiaWrap.querySelectorAll('.btn-eliminar-registro').forEach(btn => {
       btn.addEventListener('click', async (ev) => {
         const id = ev.currentTarget.getAttribute('data-id');
-        const res = await Swal.fire({
-          title: 'Eliminar registro',
-          text: '¿Seguro que deseas eliminar este registro?',
+        if (!id) return;
+        const resp = await Swal.fire({
+          title: '¿Eliminar registro?',
+          text: 'Esta acción no se puede deshacer.',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí, eliminar',
           cancelButtonText: 'Cancelar'
         });
-        if (!res.isConfirmed) return;
+        if (!resp.isConfirmed) return;
+
         registros = registros.filter(r => r.id !== id);
         await guardarEstado();
         renderAll();
@@ -446,7 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTablaRegistrosDia();
   }
 
-  // ---------- Acciones ----------
+  // ---------- Captura de registros ----------
 
   async function handleAgregarRegistro() {
     const fecha = fechaFiltro.value || hoyISO();
@@ -454,117 +480,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     const suc = sucursalInput.value;
     const monto = parseMonto(montoInput.value);
 
-    if (!fecha) {
-      Swal.fire('Atención', 'Selecciona una fecha válida.', 'info');
-      return;
-    }
-    if (!dep) {
-      Swal.fire('Atención', 'Selecciona un dependientx.', 'info');
-      return;
-    }
-    if (!suc) {
-      Swal.fire('Atención', 'Selecciona una sucursal.', 'info');
-      return;
-    }
-    if (monto <= 0) {
-      Swal.fire('Atención', 'Ingresa un monto mayor a 0.', 'info');
+    if (!dep || !suc || !monto) {
+      Swal.fire('Datos incompletos', 'Selecciona dependientx, sucursal y un monto válido.', 'warning');
       return;
     }
 
-    registros.push({
+    const nuevo = {
       id: String(Date.now()) + Math.random().toString(16).slice(2),
       fecha,
       dependiente: dep,
       sucursal: suc,
       monto
-    });
+    };
+    registros.push(nuevo);
 
-    try {
-      await guardarEstado();
-      montoInput.value = '';
-      renderAll();
-    } catch (err) {
-      console.error('Error guardando registro:', err);
-      Swal.fire('Error', 'No se pudo guardar el registro.', 'error');
-    }
+    await guardarEstado();
+    montoInput.value = '';
+    renderAll();
   }
+
+  // ---------- Corte mensual ----------
 
   async function handleCorteMensual() {
     if (!registros.length) {
       Swal.fire('Sin datos', 'No hay registros para realizar un corte.', 'info');
       return;
     }
-    const res = await Swal.fire({
-      title: 'Corte mensual',
-      text: 'Se generará un corte con los datos acumulados desde el último corte. ¿Deseas continuar?',
-      icon: 'question',
+
+    const resp = await Swal.fire({
+      title: '¿Realizar corte mensual?',
+      text: 'Se guardará un resumen del acumulado actual y se reiniciará el periodo.',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, hacer corte',
+      confirmButtonText: 'Sí, continuar',
       cancelButtonText: 'Cancelar'
     });
-    if (!res.isConfirmed) return;
 
-    const corteAnterior = metaGlobal.ultimaFechaCorte;
-    const registrosPeriodo = corteAnterior
-      ? registros.filter(r => r.fecha > corteAnterior)
-      : registros.slice();
+    if (!resp.isConfirmed) return;
 
-    if (!registrosPeriodo.length) {
-      Swal.fire('Sin datos', 'No hay registros nuevos desde el último corte.', 'info');
-      return;
-    }
-
-    const fechas = registrosPeriodo.map(r => r.fecha).sort();
-    const desde = fechas[0];
-    const hasta = fechas[fechas.length - 1];
-    const hoy = hoyISO();
-
+    const registrosAcum = getRegistrosAcumuladoActual();
     const totalesPorSucursal = {};
-    const totalesPorDependiente = {};
-    let totalGeneral = 0;
-
-    for (const r of registrosPeriodo) {
-      const m = r.monto || 0;
-      totalesPorSucursal[r.sucursal] = (totalesPorSucursal[r.sucursal] || 0) + m;
-      totalesPorDependiente[r.dependiente] = (totalesPorDependiente[r.dependiente] || 0) + m;
-      totalGeneral += m;
+    for (const suc of CONFIG.sucursales) {
+      totalesPorSucursal[suc] = sumBy(registrosAcum.filter(r => r.sucursal === suc), r => r.monto);
     }
 
     const corte = {
-      fechaCorte: hoy,
-      desde,
-      hasta,
-      metasSucursales: CONFIG.metas.sucursal || {},
-      metaPersonalGlobal: CONFIG.metas.metaPersonalGlobal || 0,
-      totalesPorSucursal,
-      totalesPorDependiente,
-      totalGeneral
+      fechaCorte: hoyISO(),
+      totalesPorSucursal
     };
 
-    if (!Array.isArray(metaGlobal.cortes)) metaGlobal.cortes = [];
+    metaGlobal.cortes = metaGlobal.cortes || [];
     metaGlobal.cortes.push(corte);
-    metaGlobal.ultimaFechaCorte = hasta;
+    metaGlobal.ultimaFechaCorte = corte.fechaCorte;
 
-    try {
-      await guardarEstado();
-      Swal.fire('Corte realizado', 'El corte mensual se guardó correctamente.', 'success');
-      renderAll();
-    } catch (err) {
-      console.error('Error guardando corte:', err);
-      Swal.fire('Error', 'No se pudo guardar el corte mensual.', 'error');
-    }
+    await guardarEstado();
+    renderAll();
+
+    Swal.fire('Corte realizado', 'El corte mensual se ha registrado correctamente.', 'success');
   }
 
-  async function handleEstadoCuentaPDF() {
-    const dep = dependienteEstadoCuenta.value;
-    if (!dep) {
-      Swal.fire('Atención', 'Selecciona un dependientx.', 'info');
-      return;
-    }
+  // ---------- Estado de cuenta (PDF simple) ----------
 
-    const registrosDep = registros.filter(r => r.dependiente === dep).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  function generarEstadoCuentaPDF(depSeleccionado) {
+    if (!depSeleccionado) return;
+
+    const registrosAcum = getRegistrosAcumuladoActual();
+    const registrosDep = registrosAcum.filter(r => r.dependiente === depSeleccionado);
     if (!registrosDep.length) {
-      Swal.fire('Sin datos', 'Este dependientx no tiene registros.', 'info');
+      Swal.fire('Sin datos', 'Este dependientx no tiene ventas en el periodo actual.', 'info');
       return;
     }
 
@@ -575,41 +558,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    doc.setFontSize(14);
-    doc.text('Estado de cuenta — Rendimiento dependientx', 10, 12);
+    doc.setFontSize(12);
+    doc.text('TRRendimiento — Estado de cuenta', 14, 15);
     doc.setFontSize(10);
-    doc.text(`Dependientx: ${dep}`, 10, 20);
-    doc.text(`Fecha de emisión: ${new Date().toLocaleString('es-SV')}`, 10, 26);
+    doc.text(`Dependientx: ${depSeleccionado}`, 14, 22);
+    doc.text(`Total acumulado: ${totalDep.toFixed(2)} USD`, 14, 28);
+    doc.text(`Meta personal: ${metaPersonal.toFixed(2)} USD`, 14, 34);
+    doc.text(`Avance: ${pct.toFixed(1)}%`, 14, 40);
 
-    doc.text(`Meta personal (global): ${formatCurrency(metaPersonal)}`, 10, 34);
-    doc.text(`Total acumulado: ${formatCurrency(totalDep)}`, 10, 40);
-    doc.text(`Porcentaje de cumplimiento: ${pct.toFixed(1)}%`, 10, 46);
-
-    const body = registrosDep.map((r, idx) => [
-      idx + 1,
+    const body = registrosDep.map(r => [
       r.fecha,
       r.sucursal,
-      formatCurrency(r.monto)
+      r.monto.toFixed(2)
     ]);
 
     doc.autoTable({
-      startY: 52,
-      head: [['#', 'Fecha', 'Sucursal', 'Monto']],
-      body,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [33, 37, 41] },
-      theme: 'striped'
+      startY: 48,
+      head: [['Fecha', 'Sucursal', 'Monto (USD)']],
+      body
     });
 
-    const fileName = `EstadoCuenta_${dep.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-    doc.save(fileName);
+    doc.save(`estado_cuenta_${depSeleccionado.replace(/\s+/g, '_')}.pdf`);
   }
 
-  // ---------- Listeners ----------
-
-  btnAgregarRegistro.addEventListener('click', handleAgregarRegistro);
-  btnCorteMensual.addEventListener('click', handleCorteMensual);
-  btnEstadoCuentaPDF.addEventListener('click', handleEstadoCuentaPDF);
+  // ---------- Eventos ----------
 
   fechaFiltro.addEventListener('change', () => {
     renderAll();
@@ -619,15 +591,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderAll();
   });
 
-  diasConRegistrosWrap.addEventListener('click', (ev) => {
-    const target = ev.target;
-    if (target.classList.contains('badge-dia-registro')) {
-      const fecha = target.getAttribute('data-fecha');
-      if (fecha) {
-        fechaFiltro.value = fecha;
-        renderAll();
-      }
+  btnAgregarRegistro.addEventListener('click', async () => {
+    await handleAgregarRegistro();
+  });
+
+  montoInput.addEventListener('keyup', async (ev) => {
+    if (ev.key === 'Enter') {
+      await handleAgregarRegistro();
     }
+  });
+
+  btnCorteMensual.addEventListener('click', async () => {
+    await handleCorteMensual();
+  });
+
+  btnEstadoCuentaPDF.addEventListener('click', () => {
+    const dep = dependienteEstadoCuenta.value;
+    if (!dep) {
+      Swal.fire('Selecciona dependientx', 'Primero elige un dependientx para generar el estado de cuenta.', 'warning');
+      return;
+    }
+    generarEstadoCuentaPDF(dep);
   });
 
   // ---------- Init ----------
@@ -636,5 +620,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await initConfig();
   await initData();
+  initDatePicker();
   renderAll();
 });
