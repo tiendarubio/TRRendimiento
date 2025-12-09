@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tablaDependientesWrap = $('tablaDependientes');
   const tablaRegistrosDiaWrap = $('tablaRegistrosDia');
   const resumenTopDependienteEl = $('resumenTopDependiente');
+  const top3Panel = $('top3Panel');
 
   // Estado en memoria
   let CONFIG = {
@@ -167,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dias = getDiasConRegistros();
     const selected = fechaFiltro.value;
     if (!dias.length) {
-      diasConRegistrosWrap.innerHTML = '<span class="text-muted">Sin registros aún.</span>';
+      diasConRegistrosWrap.innerHTML = '<span class="text-muted text-xs">Sin registros aún.</span>';
       return;
     }
     diasConRegistrosWrap.innerHTML = dias.map(d => {
@@ -256,6 +257,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     tablaSucursalesWrap.innerHTML = html;
   }
 
+  function renderTop3Panel(rowsStats) {
+    if (!top3Panel) return;
+
+    if (!rowsStats.length || rowsStats.every(r => r.totalDep <= 0)) {
+      top3Panel.innerHTML = '<span class="text-muted text-xs">Aún no hay ventas registradas.</span>';
+      return;
+    }
+
+    const top = rowsStats.slice(0, 3);
+
+    const html = top.map((row, idx) => {
+      const rank = idx + 1;
+      let rankClass = 'top3-rank-1';
+      if (rank === 2) rankClass = 'top3-rank-2';
+      if (rank === 3) rankClass = 'top3-rank-3';
+      return `
+        <div class="top3-item ${rankClass}">
+          <div class="top3-item-rank">${rank}</div>
+          <div class="top3-item-main">
+            <div class="top3-item-name">${row.dep}</div>
+            <div class="top3-item-meta">${row.pct.toFixed(1)}% de su meta</div>
+          </div>
+          <div class="top3-item-value">${formatCurrency(row.totalDep)}</div>
+        </div>
+      `;
+    }).join('');
+
+    top3Panel.innerHTML = html;
+  }
+
   function renderTablaDependientes() {
     const registrosAcum = getRegistrosAcumuladoActual();
     const metaPersonal = parseMonto(CONFIG.metas.metaPersonalGlobal ?? 0);
@@ -281,11 +312,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (rowsStats.length && rowsStats[0].totalDep > 0) {
       const top = rowsStats[0];
-      resumenTopDependienteEl.textContent =
-        `Top actual: ${top.dep} con ${formatCurrency(top.totalDep)} (${top.pct.toFixed(1)}% de su meta personal).`;
-    } else {
+      if (resumenTopDependienteEl) {
+        resumenTopDependienteEl.textContent =
+          `Top actual: ${top.dep} con ${formatCurrency(top.totalDep)} (${top.pct.toFixed(1)}% de su meta personal).`;
+      }
+    } else if (resumenTopDependienteEl) {
       resumenTopDependienteEl.textContent = 'Aún no hay ventas registradas para mostrar ranking.';
     }
+
+    // Panel compacto Top3 en el scoreboard
+    renderTop3Panel(rowsStats);
 
     let html = '<table class="table table-sm align-middle mb-0">';
     html += '<thead class="table-light"><tr>';

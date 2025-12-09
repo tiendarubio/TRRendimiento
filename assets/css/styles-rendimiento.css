@@ -13,12 +13,130 @@ body {
   padding-bottom: .35rem;
 }
 
+.text-xs {
+  font-size: 0.75rem;
+}
+
+/* Filtros alineados */
+.filtro-fecha-sucursal .form-label {
+  font-size: 0.85rem;
+}
+
+/* Badges de días con registro */
 .badge-dia-registro {
   cursor: pointer;
+  border-radius: 999px;
 }
 
 .badge-dia-registro.active {
   background-color: #0d6efd !important;
+}
+
+/* Scoreboard superior */
+.score-card {
+  font-size: 0.85rem;
+}
+
+.score-card dl dt {
+  font-weight: 500;
+}
+
+.border-end-md {
+  border-right: 1px solid #dee2e6;
+}
+
+.border-start-md {
+  border-left: 1px solid #dee2e6;
+}
+
+@media (max-width: 767.98px) {
+  .border-end-md,
+  .border-start-md {
+    border: 0 !important;
+  }
+}
+
+.top3-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.top3-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.6rem;
+}
+
+.top3-item-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.top3-item-main {
+  flex: 1;
+  margin-left: 0.4rem;
+  margin-right: 0.4rem;
+  overflow: hidden;
+}
+
+.top3-item-name {
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.top3-item-meta {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.top3-item-value {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.top3-rank-1 {
+  background: #fff9db;
+}
+
+.top3-rank-1 .top3-item-rank {
+  background: #ffe066;
+  color: #856404;
+}
+
+.top3-rank-2 {
+  background: #f4f5f7;
+}
+
+.top3-rank-2 .top3-item-rank {
+  background: #d6d8db;
+  color: #383d41;
+}
+
+.top3-rank-3 {
+  background: #e6f4ff;
+}
+
+.top3-rank-3 .top3-item-rank {
+  background: #9ec5fe;
+  color: #0b469c;
+}
+
+/* Tablas compactas */
+#tablaSucursales table,
+#tablaDependientes table,
+#tablaRegistrosDia table {
+  font-size: 0.85rem;
 }
 
 .progress {
@@ -29,23 +147,12 @@ body {
   font-size: 0.8rem;
 }
 
-.text-xs {
-  font-size: 0.75rem;
-}
-
-/* Tablas compactas */
-#tablaSucursales table,
-#tablaDependientes table,
-#tablaRegistrosDia table {
-  font-size: 0.85rem;
-}
-
 #tablaSucursales .progress,
 #tablaDependientes .progress {
   background-color: #e9ecef;
 }
 
-/* Leaderboard / ranking */
+/* Leaderboard / ranking dependientxs */
 .rank-col {
   width: 48px;
   text-align: center;
@@ -95,7 +202,7 @@ body {
   border-top: 2px solid #dee2e6;
 }
 
-/* Responsive ajustes */
+/* Ajustes responsive */
 @media (max-width: 767.98px) {
   .navbar-brand span {
     font-size: 0.95rem;

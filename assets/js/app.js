@@ -51,7 +51,7 @@ async function fetchRendimientoConfig() {
  * Carga registros + meta desde JSONBin vía API.
  */
 async function loadRendimientoFromBin() {
-  const url = '/api/jsonbin-load?binId=' + encodeURIComponent(RENDIMIENTO_BIN_ID);
+  const url = '/api/jsonbin-load?binId=' + encodeURIComponent(RENDITIMIENTO_BIN_ID ?? RENDIMIENTO_BIN_ID);
   const resp = await fetch(url);
   if (!resp.ok) {
     throw new Error('Error al cargar rendimiento (' + resp.status + ')');

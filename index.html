@@ -38,22 +38,22 @@
   </nav>
 
   <!-- MAIN CONTENT -->
-  <main class="container-fluid py-4">
+  <main class="container-xxl py-4">
     <div class="row g-4">
 
       <!-- PANEL IZQUIERDO: Captura y filtros -->
       <div class="col-xl-3 col-lg-4">
         <!-- Card: Configuración / Filtros -->
-        <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm mb-4 h-100">
           <div class="card-header bg-white border-0 pb-0">
-            <h6 class="card-title mb-1">
-              <i class="fa-solid fa-sliders me-2 text-primary"></i>
-              Filtros / corte diario
+            <h6 class="card-title mb-1 d-flex align-items-center gap-2">
+              <i class="fa-solid fa-sliders text-primary"></i>
+              <span>Filtros y corte</span>
             </h6>
-            <p class="text-muted small mb-0">Selecciona fecha y sucursal para las tablas.</p>
+            <p class="text-muted small mb-0">Control diario y corte mensual.</p>
           </div>
           <div class="card-body">
-            <div class="row g-3 align-items-end mb-2">
+            <div class="row g-3 mb-2 align-items-end filtro-fecha-sucursal">
               <div class="col-12">
                 <label for="fechaFiltro" class="form-label fw-semibold mb-1">
                   Fecha corte (venta diaria)
@@ -70,14 +70,15 @@
               </div>
             </div>
 
-            <div class="mb-3">
-              <p class="text-muted small mb-1">
-                Días con registros
-              </p>
-              <div id="diasConRegistros" class="d-flex flex-wrap gap-1 small"></div>
+            <div class="mb-3 border rounded-3 p-2 bg-light-subtle small">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="fw-semibold text-muted">Días con registros</span>
+                <span class="text-muted text-xs">Click para cargar</span>
+              </div>
+              <div id="diasConRegistros" class="d-flex flex-wrap gap-1"></div>
             </div>
 
-            <div class="d-grid gap-2">
+            <div class="d-grid gap-2 mt-2">
               <button id="btnCorteMensual" class="btn btn-outline-danger btn-sm">
                 <i class="fa-solid fa-scissors me-1"></i>
                 Corte mensual
@@ -87,11 +88,11 @@
         </div>
 
         <!-- Card: Captura de ventas -->
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mt-4">
           <div class="card-header bg-white border-0 pb-0">
-            <h6 class="card-title mb-1">
-              <i class="fa-solid fa-cash-register me-2 text-primary"></i>
-              Captura de venta diaria
+            <h6 class="card-title mb-1 d-flex align-items-center gap-2">
+              <i class="fa-solid fa-cash-register text-primary"></i>
+              <span>Captura de venta diaria</span>
             </h6>
             <p class="text-muted small mb-0">Registra cuánto vendió cada dependientx.</p>
           </div>
@@ -149,47 +150,60 @@
         </div>
       </div>
 
-      <!-- PANEL DERECHO: Resúmenes y tablas -->
+      <!-- PANEL DERECHO: Scoreboard + tablas -->
       <div class="col-xl-9 col-lg-8">
-        <!-- Resumen global -->
-        <div class="row g-4 mb-3">
-          <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-store me-2 text-primary"></i>
-                  Venta por sucursal
-                </h6>
-                <p class="text-muted small mb-2">
-                  Valores para la sucursal seleccionada en la fecha indicada.
-                </p>
-                <dl class="row mb-0 small">
-                  <dt class="col-6">Venta diaria sucursal</dt>
-                  <dd class="col-6 text-end" id="ventaDiariaSucursal">$0.00</dd>
+        <!-- SCOREBOARD SUPERIOR -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body py-3">
+            <div class="row g-3 align-items-stretch">
+              <!-- Resumen sucursal -->
+              <div class="col-md-4">
+                <div class="score-card h-100 border-end-md pe-md-3">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="text-muted text-xs text-uppercase fw-semibold">Sucursal seleccionada</span>
+                    <i class="fa-solid fa-store text-primary small"></i>
+                  </div>
+                  <div class="small text-muted mb-2">Valores para la sucursal en la fecha indicada.</div>
+                  <dl class="row mb-0 small">
+                    <dt class="col-7">Venta diaria</dt>
+                    <dd class="col-5 text-end" id="ventaDiariaSucursal">$0.00</dd>
 
-                  <dt class="col-6">Venta total sucursal (acumulado)</dt>
-                  <dd class="col-6 text-end" id="ventaTotalSucursal">$0.00</dd>
-                </dl>
+                    <dt class="col-7">Venta total (acumulado)</dt>
+                    <dd class="col-5 text-end" id="ventaTotalSucursal">$0.00</dd>
+                  </dl>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-chart-line me-2 text-primary"></i>
-                  Venta global
-                </h6>
-                <p class="text-muted small mb-2">
-                  Suma de todas las sucursales.
-                </p>
-                <dl class="row mb-0 small">
-                  <dt class="col-6">Suma venta diaria (todas)</dt>
-                  <dd class="col-6 text-end" id="ventaDiariaGlobal">$0.00</dd>
 
-                  <dt class="col-6">Suma total acumulada (todas)</dt>
-                  <dd class="col-6 text-end" id="ventaTotalGlobal">$0.00</dd>
-                </dl>
+              <!-- Resumen global -->
+              <div class="col-md-4">
+                <div class="score-card h-100 border-end-md px-md-3">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="text-muted text-xs text-uppercase fw-semibold">Global</span>
+                    <i class="fa-solid fa-chart-line text-primary small"></i>
+                  </div>
+                  <div class="small text-muted mb-2">Suma de todas las sucursales.</div>
+                  <dl class="row mb-0 small">
+                    <dt class="col-7">Suma venta diaria</dt>
+                    <dd class="col-5 text-end" id="ventaDiariaGlobal">$0.00</dd>
+
+                    <dt class="col-7">Suma total acumulada</dt>
+                    <dd class="col-5 text-end" id="ventaTotalGlobal">$0.00</dd>
+                  </dl>
+                </div>
+              </div>
+
+              <!-- Top 3 dependientxs -->
+              <div class="col-md-4">
+                <div class="score-card h-100 ps-md-3 border-start-md">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="text-muted text-xs text-uppercase fw-semibold">Top 3 dependientxs</span>
+                    <i class="fa-solid fa-trophy text-warning small"></i>
+                  </div>
+                  <div class="small text-muted mb-2">Ranking acumulado vs meta personal.</div>
+                  <div id="top3Panel" class="top3-panel small">
+                    <!-- Se llena por JS -->
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -197,12 +211,12 @@
 
         <!-- Card: Avance de meta por sucursal (acumulado) -->
         <div class="card shadow-sm mb-4">
-          <div class="card-header bg-white border-0">
+          <div class="card-header bg-white border-0 pb-0">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-flag-checkered me-2 text-primary"></i>
-                  Avance de meta por sucursal (acumulado)
+                <h6 class="card-title mb-1 d-flex align-items-center gap-2">
+                  <i class="fa-solid fa-flag-checkered text-primary"></i>
+                  <span>Avance de meta por sucursal (acumulado)</span>
                 </h6>
                 <p class="text-muted small mb-0">
                   Incluye todos los registros desde el último corte mensual.
@@ -210,7 +224,7 @@
               </div>
             </div>
           </div>
-          <div class="card-body border-top">
+          <div class="card-body border-top pt-3">
             <div id="tablaSucursales" class="table-responsive table-sm">
               <!-- Se llena por JS -->
             </div>
@@ -219,12 +233,12 @@
 
         <!-- Card: Rendimiento por dependientx (acumulado) -->
         <div class="card shadow-sm mb-4">
-          <div class="card-header bg-white border-0">
+          <div class="card-header bg-white border-0 pb-0">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-user-chart me-2 text-primary"></i>
-                  Rendimiento por dependientx (acumulado)
+                <h6 class="card-title mb-1 d-flex align-items-center gap-2">
+                  <i class="fa-solid fa-user-chart text-primary"></i>
+                  <span>Rendimiento por dependientx (acumulado)</span>
                 </h6>
                 <p class="text-muted small mb-0">
                   Ranking global vs meta personal (global).
@@ -233,7 +247,7 @@
               </div>
             </div>
           </div>
-          <div class="card-body border-top">
+          <div class="card-body border-top pt-3">
             <div id="tablaDependientes" class="table-responsive table-sm">
               <!-- Se llena por JS -->
             </div>
@@ -242,12 +256,12 @@
 
         <!-- Card: Registros del día -->
         <div class="card shadow-sm">
-          <div class="card-header bg-white border-0">
+          <div class="card-header bg-white border-0 pb-0">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h6 class="card-title mb-1">
-                  <i class="fa-solid fa-calendar-day me-2 text-primary"></i>
-                  Registros del día seleccionado
+                <h6 class="card-title mb-1 d-flex align-items-center gap-2">
+                  <i class="fa-solid fa-calendar-day text-primary"></i>
+                  <span>Registros del día seleccionado</span>
                 </h6>
                 <p class="text-muted small mb-0">
                   Ventas individuales para la fecha y sucursal seleccionadas.
@@ -255,7 +269,7 @@
               </div>
             </div>
           </div>
-          <div class="card-body border-top">
+          <div class="card-body border-top pt-3">
             <div id="tablaRegistrosDia" class="table-responsive table-sm">
               <!-- Se llena por JS -->
             </div>
